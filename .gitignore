@@ -1,0 +1,14 @@
+# Root (if you init git here)
+.DS_Store
+Thumbs.db
+*.log
+
+# Backend
+backend/node_modules/
+backend/.env
+backend/data/*.json
+!backend/data/.gitkeep
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
