@@ -1,5 +1,5 @@
 import { Column, Line, Pie } from "@ant-design/charts";
-import { App, Card, Col, Row, Spin, Statistic, Typography } from "antd";
+import { App, Card, Col, Grid, Row, Spin, Statistic, Typography } from "antd";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { useEffect, useState } from "react";
@@ -18,6 +18,8 @@ function utcDay(iso) {
 
 export default function DashboardPage() {
   const { message } = App.useApp();
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.md;
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
   const [vendors, setVendors] = useState([]);
@@ -70,7 +72,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <Typography.Title level={3} style={{ marginTop: 0 }}>
+      <Typography.Title level={isMobile ? 4 : 3} style={{ marginTop: 0 }}>
         Dashboard
       </Typography.Title>
       <Typography.Text type="secondary">Charts pull from the same REST API as the table.</Typography.Text>
@@ -112,7 +114,7 @@ export default function DashboardPage() {
               innerRadius={0.52}
               label={{ text: "count", style: { fontSize: 11 } }}
               legend={{ position: "bottom" }}
-              height={300}
+              height={isMobile ? 240 : 300}
             />
           </Card>
         </Col>
@@ -122,14 +124,20 @@ export default function DashboardPage() {
               data={vendors}
               xField="vendor"
               yField="count"
-              height={300}
+              height={isMobile ? 240 : 300}
               axis={{ x: { labelAutoRotate: true } }}
             />
           </Card>
         </Col>
         <Col xs={24} lg={14}>
           <Card title="Entries per month" bordered={false}>
-            <Line data={months} xField="period" yField="count" height={280} point={{ size: 3 }} />
+            <Line
+              data={months}
+              xField="period"
+              yField="count"
+              height={isMobile ? 220 : 280}
+              point={{ size: 3 }}
+            />
           </Card>
         </Col>
         <Col xs={24} lg={10}>
@@ -138,7 +146,7 @@ export default function DashboardPage() {
               data={cwes}
               xField="cwe"
               yField="count"
-              height={280}
+              height={isMobile ? 220 : 280}
               axis={{ x: { labelAutoRotate: true } }}
             />
           </Card>

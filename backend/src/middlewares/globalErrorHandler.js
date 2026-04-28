@@ -6,7 +6,7 @@ function globalErrorHandler(err, req, res, next) {
     return next(err);
   }
 
-  let statusCode =
+  const statusCode =
     err.statusCode ||
     err.status ||
     (err instanceof mongoose.Error.ValidationError ? 400 : null) ||

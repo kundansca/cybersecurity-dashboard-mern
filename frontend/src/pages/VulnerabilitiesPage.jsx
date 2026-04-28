@@ -8,6 +8,7 @@ import {
   Descriptions,
   Drawer,
   Form,
+  Grid,
   Input,
   Row,
   Select,
@@ -40,6 +41,8 @@ const columns = [
 
 export default function VulnerabilitiesPage() {
   const { message } = App.useApp();
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.md;
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState([]);
@@ -108,7 +111,7 @@ export default function VulnerabilitiesPage() {
 
   return (
     <div>
-      <Typography.Title level={3} style={{ marginTop: 0 }}>
+      <Typography.Title level={isMobile ? 4 : 3} style={{ marginTop: 0 }}>
         Vulnerabilities
       </Typography.Title>
       <Typography.Text type="secondary">Row click opens the rest of the fields.</Typography.Text>
@@ -156,10 +159,11 @@ export default function VulnerabilitiesPage() {
               </Form.Item>
             </Col>
             <Col xs={24} lg={8} style={{ display: "flex", alignItems: "flex-end" }}>
-              <Space wrap>
+              <Space wrap style={{ width: isMobile ? "100%" : "auto" }}>
                 <Button
                   type="primary"
                   icon={<SearchOutlined />}
+                  block={isMobile}
                   onClick={() => {
                     setPage(1);
                     load(1, pageSize);
@@ -168,6 +172,7 @@ export default function VulnerabilitiesPage() {
                   Apply
                 </Button>
                 <Button
+                  block={isMobile}
                   onClick={() => {
                     form.resetFields();
                     setPage(1);
@@ -189,7 +194,8 @@ export default function VulnerabilitiesPage() {
           loading={loading}
           columns={columns}
           dataSource={rows}
-          scroll={{ x: 1000 }}
+          scroll={{ x: isMobile ? 1200 : 1000 }}
+          size={isMobile ? "small" : "middle"}
           pagination={{
             current: page,
             pageSize,
@@ -212,7 +218,7 @@ export default function VulnerabilitiesPage() {
 
       <Drawer
         title={detail?.cveID || "…"}
-        width={520}
+        width={isMobile ? "100%" : 520}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         destroyOnClose
