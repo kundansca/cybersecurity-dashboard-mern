@@ -1,99 +1,146 @@
-# CISA KEV dashboard (MERN)
+# CISA KEV Dashboard (MERN)
 
-Small full-stack app for the CISA **Known Exploited Vulnerabilities** catalog: data lives in MongoDB, the API only reads from the database, and the React UI shows a dashboard plus a filterable CVE table.
-
-**Dataset (download yourself — do not rely on the repo for the file):**  
-https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json  
-
-Save it anywhere you like. The import script below expects a path to that JSON (or drop it under `backend/data/` if you use the default path).
-
-**What you need installed:** Node 18+, MongoDB running locally or on Atlas.
+This is a small full-stack project built using the MERN stack. It uses the CISA Known Exploited Vulnerabilities (KEV) dataset and displays the data in a dashboard along with a searchable CVE table.
 
 ---
 
-## 1. MongoDB
+## Dataset
 
-Point `MONGODB_URI` at your instance. Default database name is `kev_catalog` (override with `MONGODB_DB_NAME` if you want).
+Download the dataset from here:
+
+https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+
+Note: The dataset is not included in the repository. Please download it manually.
 
 ---
 
-## 2. Backend
+## Requirements
 
-```bash
-cd backend
-cp .env.example .env
-# On Windows: copy .env.example .env
+- Node.js (v18 or above)
+- MongoDB (local or Atlas)
+
+---
+
+## Tech Stack
+
+- Frontend: React (Vite) + Ant Design
+- Backend: Node.js + Express
+- Database: MongoDB
+
+## 1. MongoDB Setup
+
+Add your MongoDB connection string in the `.env` file:
+
+MONGODB_URI=your_connection_string  
+MONGODB_DB_NAME=kev_catalog
+
+---
+
+## 2. Backend Setup
+
+cd backend  
 npm install
-```
 
-**Import (wipes the `vulnerabilities` collection, then inserts one document per array entry):**
+If `.env` file is not present, copy it from `.env.example`.
 
-```bash
+### Import Data
+
+This will clear existing data and insert fresh records:
+
 npm run ingest -- path/to/known_exploited_vulnerabilities.json
-```
 
-If the file is at `backend/data/known_exploited_vulnerabilities.json`, you can run:
+If the file is inside `backend/data/`, run:
 
-```bash
 npm run ingest
-```
 
-**Start the API:**
+### Run Backend
 
-```bash
 npm run dev
-```
 
-Server listens on `PORT` from `.env` (default 5000). Set `CORS_ORIGIN` to your frontend URL (e.g. `http://localhost:5173`).
+Backend runs on port 5000 (or as set in `.env`).
 
 ---
 
-## 3. Frontend
+## 3. Frontend Setup
 
-```bash
-cd frontend
-npm install
+cd frontend  
+npm install  
 npm run dev
-```
 
-Vite dev server proxies `/api` to the backend (see `frontend/vite.config.js`). For a production build against another host, set `VITE_API_BASE` (see `frontend/.env.example`).
-
-**Screens**
-
-- **Dashboard** — counts and charts (ransomware split, top vendors, new entries by month, CWE frequency) from `/api/stats/*`.
-- **Vulnerabilities** — paginated table (CVE, vendor, product, title, dates, ransomware). Filters: text search, vendor, product, ransomware flag, date-added range. Row click opens extra fields in a drawer.
+Frontend runs on:  
+http://localhost:5173
 
 ---
 
-## 4. API (all under `/api`)
+## Live Demo
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| GET | `/api/health` | Liveness check |
-| GET | `/api/vulnerabilities` | Paginated list. Query: `page`, `limit` (max 100), optional `vendor`, `product`, `ransomware`, `dateFrom`, `dateTo`, `search` |
-| GET | `/api/vulnerabilities/:cveId` | Single CVE |
-| GET | `/api/stats/summary` | Totals, ransomware breakdown, catalog version(s) in DB, min/max `dateAdded` |
-| GET | `/api/stats/top-vendors` | Optional `limit` (capped) |
-| GET | `/api/stats/cwe-distribution` | Optional `limit` |
-| GET | `/api/stats/additions-by-month` | Optional `limit` |
-
-List shape: `{ success, data, meta: { page, limit, total, totalPages } }`. Errors: `{ success: false, error: { message, ... } }`.
+https://cybersecurity-dashboard-frontend.onrender.com
 
 ---
 
-## 5. Design notes (for reviewers)
+## Features
 
-- **Storage:** One Mongo document per object in the JSON `vulnerabilities` array — not one giant blob for the whole feed.
-- **Dates:** CISA uses `YYYY-MM-DD` strings; they are parsed to UTC midnight so range filters do not shift by timezone.
-- **Missing fields:** Strings default to empty where it makes sense; `knownRansomwareCampaignUse` defaults to `Unknown`; `cwes` is always a string array (possibly empty).
-- **Indexes:** Unique on `cveID`, plus indexes on fields used for sorting and filters (vendor/product, dates, ransomware).
-- **List queries:** Projection + `skip`/`limit` + a separate `countDocuments` with the same filter — nothing loads the full collection for a page of results.
-- **Stats:** Mongo aggregation pipelines (`$facet` on summary, `$unwind` for CWE counts, etc.).
+### Dashboard
 
-Re-importing replaces all rows in `vulnerabilities` so a fresh run matches whatever JSON file you passed in.
+- Total vulnerabilities count
+- Ransomware usage breakdown
+- Top vendors
+- Monthly added vulnerabilities
+- CWE distribution
+
+### Vulnerabilities Table
+
+- Paginated CVE list
+- Filters: vendor, product, ransomware, date range
+- Search functionality
+- Click row to view more details
 
 ---
 
-## 6. Before you submit
+## API Endpoints
 
-Confirm a clean clone: `npm install` in both folders, ingest once, backend + frontend start, and the UI loads data. If the repo is public, double-check no secrets in `.env` (only `.env.example` should describe variables).
+All endpoints are under `/api`
+
+- GET /api/health
+- GET /api/vulnerabilities
+- GET /api/vulnerabilities/:cveId
+- GET /api/stats/summary
+- GET /api/stats/top-vendors
+- GET /api/stats/cwe-distribution
+- GET /api/stats/additions-by-month
+
+---
+
+## Design Notes
+
+- Each vulnerability is stored as a separate document
+- Proper indexing is used for better performance
+- MongoDB aggregation is used for stats
+- Dates are handled carefully to avoid timezone issues
+
+---
+
+## Before Running
+
+Make sure:
+
+- You have installed dependencies in both backend and frontend
+- Dataset is imported using the ingest script
+- Backend and frontend are running
+- Data is visible in the UI
+
+If data is not showing, check MongoDB connection and API URL.
+
+Also, do not commit the `.env` file.
+
+---
+
+## Why I Built This
+
+This project was built to practice working with real-world data, MongoDB queries, and building a clean dashboard using React.
+
+---
+
+## Author
+
+Kundan Kumar Singh
